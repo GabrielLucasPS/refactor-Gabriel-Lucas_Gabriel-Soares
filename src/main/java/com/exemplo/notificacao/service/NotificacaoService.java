@@ -2,23 +2,20 @@ package com.exemplo.notificacao.service;
 
 import com.exemplo.notificacao.model.Pedido;
 import org.springframework.stereotype.Service;
+import java.util.List;
 
 @Service
-public class NotificacaoService {
+public class NotificacaoService implements PedidoObserver {
+    private final List<NotificacaoStrategy> estrategias;
 
-    private final EmailService emailService;
-    private final SmsService smsService;
-    private final PushService pushService;
-
-    public NotificacaoService(EmailService emailService, SmsService smsService, PushService pushService) {
-        this.emailService = emailService;
-        this.smsService = smsService;
-        this.pushService = pushService;
+    public NotificacaoService(List<NotificacaoStrategy> estrategias) {
+        this.estrategias = estrategias;
     }
 
-    public void enviarNotificacoes(Pedido pedido) {
-        emailService.enviar(pedido);
-        smsService.enviar(pedido);
-        pushService.enviar(pedido);
+    @Override
+    public void pedidoCriado(Pedido pedido) {
+        for (NotificacaoStrategy estrategia : estrategias) {
+            estrategia.enviar(pedido);
+        }
     }
 }
